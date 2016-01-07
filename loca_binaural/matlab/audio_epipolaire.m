@@ -64,6 +64,7 @@ elseif strcmp(FFT_or_STFT,'stft') % avec la STFT
         % diff de phase
         delta = angle(X_droite(f_bin,timestep)) - angle(X_gauche(f_bin,timestep) );
         % AEG
+        (c*delta) / (2*pi*f(f_bin)*d)
         theta_estime = acosd((c*delta) / (2*pi*f(f_bin)*d));
         angle_est = [angle_est real(angle(theta_estime))];
         %debug
