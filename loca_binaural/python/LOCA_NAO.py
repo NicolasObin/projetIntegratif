@@ -72,4 +72,4 @@ for ii in np.arange(0,arg1L.shape[0]):
 			angle_est_liste.append(angle_est)
 			print 'delta; angle : ',delta,'; ',angle_est
 
-print 'angle moyen : ',np.mean(angle_est_liste)
+print 'angle moyen : ',np.mean(angle_est_liste) # pas représentatif
