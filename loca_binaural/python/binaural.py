@@ -1,5 +1,5 @@
 # JM
-
+# VIEUX TRUC, PREFERER LOCA_NAO.PY
 import scipy, numpy as np
 import scipy.io.wavfile as wav
 import pylab
