@@ -26,6 +26,12 @@ def CorFleche (corX,corY,theta,tailleFleche):
     xF=tailleFleche*np.sin(theta)
     return corX,corY,corX+xF,corY+yF
 
+def frame_canv(PosX,PosY,TextPos,widget,image,theta,sizeFleche):
+    widget.create_image(PosX,PosY, anchor = CENTER, image = image, state = NORMAL)
+    widget.create_text(PosX,PosY-10,text = TextPos, anchor = CENTER, fill = 'red')
+    xf_s,yf_s,xf_e,yf_e = CorFleche(PosX,PosY,theta,sizeFleche)
+    widget.create_line(xf_s,yf_s,xf_e,yf_e,arrow = LAST,fill= 'orange')
+
 def main(robotIP):
     # Init proxies.
     try:
@@ -72,8 +78,8 @@ def main(robotIP):
     # Send NAO to Pose Init
     postureProxy.goToPosture("StandInit", 0.5)
 	# created a walk task
-    x = 0
-    y = 0.2
+    x = 0.1
+    y = 0
     theta_goal = 0
 
     motionProxy.moveInit()
@@ -82,11 +88,7 @@ def main(robotIP):
     time.sleep(0.1)
 
     #Position initiale
-    canvas.create_image(corX,corY, anchor = CENTER, image = tetenao, state = NORMAL, tags = 'nao')
-    canvas.create_text(corX,corY-10,text = 'P0', anchor = CENTER, fill = 'red')
-    xf_s,yf_s,xf_e,yf_e = CorFleche(corX,corY,theta,sizeFleche)
-    canvas.create_line(xf_s,yf_s,xf_e,yf_e,arrow = LAST,fill= 'orange')
-
+    frame_canv(corX,corY,'P0',canvas,tetenao,theta,sizeFleche)
     xx,yy = changement(corX,x,corY,y,theta,sizeFac)
     # update des param
     corX = xx
@@ -94,10 +96,7 @@ def main(robotIP):
     theta = theta + theta_goal
 
     #Position finale
-    canvas.create_image(xx,yy, anchor = CENTER, image = tetenao, state = NORMAL)
-    canvas.create_text(xx,yy-10,text = 'P1', anchor = CENTER, fill = 'red')
-    xf_s,yf_s,xf_e,yf_e = CorFleche(corX,corY,theta,sizeFleche)
-    canvas.create_line(xf_s,yf_s,xf_e,yf_e,arrow = LAST,fill= 'orange')
+    frame_canv(xx,yy,'P1',canvas,tetenao,theta,sizeFleche)
     canvas.pack()
     fenetre.update()
 
@@ -110,7 +109,7 @@ def main(robotIP):
 	# created a walk task
     x = 0
     y = 0
-    theta_goal = -np.pi/2
+    theta_goal = np.pi/2
 
     motionProxy.moveInit()
     motionProxy.post.moveTo(x, y, theta_goal)
@@ -118,11 +117,7 @@ def main(robotIP):
 	# wait that the move process start running
     time.sleep(0.1)
     #Position initiale
-    canvas.create_image(corX,corY, anchor = CENTER, image = tetenao, state = NORMAL, tags = 'nao')
-    canvas.create_text(corX,corY-10,text = 'P0', anchor = CENTER, fill = 'red')
-    xf_s,yf_s,xf_e,yf_e = CorFleche(corX,corY,theta,sizeFleche)
-    canvas.create_line(xf_s,yf_s,xf_e,yf_e,arrow = LAST,fill= 'orange')
-
+    frame_canv(corX,corY,'P0',canvas,tetenao,theta,sizeFleche)
     xx,yy = changement(corX,x,corY,y,theta,sizeFac)
     # update des param
     corX = xx
@@ -130,10 +125,7 @@ def main(robotIP):
     theta = theta + theta_goal
 
     #Position finale
-    canvas.create_image(xx,yy, anchor = CENTER, image = tetenao, state = NORMAL)
-    canvas.create_text(xx,yy-10,text = 'P1', anchor = CENTER, fill = 'red')
-    xf_s,yf_s,xf_e,yf_e = CorFleche(corX,corY,theta,sizeFleche)
-    canvas.create_line(xf_s,yf_s,xf_e,yf_e,arrow = LAST,fill= 'orange')
+    frame_canv(xx,yy,'P1',canvas,tetenao,theta,sizeFleche)
     canvas.pack()
     fenetre.update()
 
