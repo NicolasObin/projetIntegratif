@@ -63,7 +63,7 @@ if __name__ == "__main__":
 	ordidir = option.odir
 
 	# Initialisation
-	robotIP='192.168.2.4'
+	robotIP='nao.local'
 	PORT = 9559
 	[recorder,parole] = Init(robotIP,PORT)
 	

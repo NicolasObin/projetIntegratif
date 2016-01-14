@@ -66,7 +66,7 @@ def main(robotIP):
 	# une autre frame pour le canvas
     frame_canvas = Frame(fenetre, borderwidth=2, relief=GROOVE)
     frame_canvas.pack(side=BOTTOM, padx = 5, pady = 5)
-    canvas = Canvas(frame_canvas, width = can_width, height = can_height, background = 'gray')
+    canvas = Canvas(frame_canvas, width = can_width, height = can_height, background = 'white')
     canvas.pack()
     # image nao    
     tetenao = PhotoImage(file ="naoHead.png") # attention si ya une instance Tkinter encore ouverte ça chie
@@ -78,7 +78,7 @@ def main(robotIP):
     # Send NAO to Pose Init
     postureProxy.goToPosture("StandInit", 0.5)
 	# created a walk task
-    x = 0.1
+    x = 0.2
     y = 0
     theta_goal = 0
 
@@ -90,6 +90,7 @@ def main(robotIP):
     #Position initiale
     frame_canv(corX,corY,'P0',canvas,tetenao,theta,sizeFleche)
     xx,yy = changement(corX,x,corY,y,theta,sizeFac)
+    
     # update des param
     corX = xx
     corY = yy
@@ -97,6 +98,8 @@ def main(robotIP):
 
     #Position finale
     frame_canv(xx,yy,'P1',canvas,tetenao,theta,sizeFleche)
+    #canvas.tag_lower(objet) mettre en arriére plan
+    canvas.tag_lower(canvas.create_rectangle(can_width, can_height, xx, yy, fill="orange"))
     canvas.pack()
     fenetre.update()
 
@@ -126,6 +129,7 @@ def main(robotIP):
 
     #Position finale
     frame_canv(xx,yy,'P1',canvas,tetenao,theta,sizeFleche)
+    canvas.tag_lower(canvas.create_rectangle(can_width, can_height, xx, yy, fill="orange"))
     canvas.pack()
     fenetre.update()
 
@@ -136,7 +140,7 @@ if __name__ == "__main__":
     robotIp = 'nao.local'
 
     if len(sys.argv) <= 1:
-        print "Usage python motion_walk.py robotIP (optional default: nao.local)"
+        print "Usage python Cartographie.py robotIP (optional default: nao.local)"
     else:
         robotIp = sys.argv[1]
 
