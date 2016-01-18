@@ -2,3 +2,7 @@ denoise/matlab/wavs
 loca_binaural/matlab/wavs
 loca_binaural/python/wavs
 messl/wavs
+latex_messl/partie_messl.aux
+latex_messl/partie_messl.log
+latex_messl/partie_messl.pdf
+latex_messl/partie_messl.synctex.gz

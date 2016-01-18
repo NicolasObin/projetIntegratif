@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.12.13)  18 JAN 2016 16:51
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.12.13)  18 JAN 2016 17:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -489,7 +489,7 @@ LaTeX Font Info:    External font `lmex10' loaded for size
  [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2]
-Overfull \hbox (49.82983pt too wide) in paragraph at lines 80--80
+Overfull \hbox (49.82983pt too wide) in paragraph at lines 81--81
 [] 
  []
 
@@ -512,7 +512,7 @@ b></usr/share/texmf/fonts/type1/public/lm/lmr12.pfb></usr/share/texmf/fonts/typ
 e1/public/lm/lmr17.pfb></usr/share/texmf/fonts/type1/public/lm/lmr8.pfb></usr/s
 hare/texmf/fonts/type1/public/lm/lmri12.pfb></usr/share/texmf/fonts/type1/publi
 c/lm/lmro12.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb>
-Output written on partie_messl.pdf (3 pages, 153328 bytes).
+Output written on partie_messl.pdf (3 pages, 153341 bytes).
 PDF statistics:
  61 PDF objects out of 1000 (max. 8388607)
  45 compressed objects within 1 object stream
