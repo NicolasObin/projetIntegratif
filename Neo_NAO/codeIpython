@@ -1,0 +1,27 @@
+#code pour ipython
+
+from naoqi import ALProxy
+import motion
+
+s = ALProxy("ALTextToSpeech", 'nao.local', 9559)
+
+m = ALProxy("ALMotion", 'nao.local', 9559)
+
+p = ALProxy("ALRobotPosture", 'nao.local', 9559)
+
+p.goToPosture("Sit", 0.5)
+
+sonarP = ALProxy("ALSonar", 'nao.local', 9559)
+sonarP.subscribe("myApplication")
+
+p.goToPosture("Stand", 0.5)
+
+m.setAngles(["LShoulderPitch", "RShoulderPitch"], [5, -5], 0.5)
+
+m.setWalkTargetVelocity(1, 1, 0, 0.5)
+m.stopMove()
+
+m.getJointNames("Arms")
+
+
+motionProxy.setFootStepsWithSpeed(footStepsList[i][0],footStepsList[i][1],[stepFrequency],clearExisting)
