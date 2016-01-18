@@ -1,0 +1,83 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[frenchb]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[babel]{csquotes}
+\MakeAutoQuote{«}{»}
+\pagestyle{headings}
+
+\title{MESSL}
+\author{jmatthieu}
+
+\begin{document}
+\maketitle
+Ce document accompagne l'article MESSL, il ne présente cependant pas tout. Les notations sont les mêmes sauf lorsque celà est précisé. Les équations du papier MESSL sont notées (m$N$) où $N$ correspond au numéro de l'équation dans le papier MESSL.
+
+Le modèle (noté $\Lambda$ au lieu de $\Theta$) que l'on veut estimer a pour paramètres (voir \textit{III. Parameter estimation from mixtures} et l'équation (m10) pour le détail) :
+\begin{equation*}
+\Lambda = \{\xi(\omega),\sigma_{i,\tau}(\omega),\mu_{i}(\omega),\nu_i(\omega),\psi_{i,\tau}\}
+\end{equation*}
+La probabilité de l'observation $\phi(\omega,t) ; \alpha(\omega,t)$ connaissant les paramètres du modèle $\Lambda$ est donnée par :
+\begin{equation*}
+p(\phi(\omega,t), \alpha(\omega,t) | \Lambda)
+\end{equation*}
+La vraisemblance est donnée par (par définition) :
+\begin{align*}
+L(\Lambda) = \displaystyle \prod_{\omega,t} p(\phi(\omega,t), \alpha(\omega,t) | \Lambda)
+\end{align*}
+Et la log-vraisemblance par (par définition) :
+\begin{align}
+\mathcal{L}(\Lambda) = & \log L(\Lambda) \nonumber \\
+ = & \log \displaystyle \prod_{\omega,t} p(\phi(\omega,t), \alpha(\omega,t) | \Lambda) \nonumber \\
+ = & \displaystyle\sum_{\omega,t} \log p(\phi(\omega,t), \alpha(\omega,t) | \Lambda) \label{eq:logvrai}
+\end{align}
+où l'équation (\ref{eq:logvrai}) correspond à l'équation (m12).
+
+La variable cachée $z_{i,\tau}(\omega,t)$ correspond à la classe de chaque observation, c'est à dire au couple ($i$; $\tau$) dont est issue l'observation. $z_{i,\tau}(\omega,t) = 1$ si l'observation est issue du couple ($i$; $\tau$), zéro autrement. En marginalisant sur la variable cachée $z_{i,\tau}(\omega,t)$ puis en appliquant la loi de Bayes on obtient à partir de l'équation (1)
+\begin{align}
+& p(\phi(\omega,t), \alpha(\omega,t) | \Lambda)\nonumber \\
+= & \displaystyle\sum_{i, \tau} p(\phi(\omega,t), \alpha(\omega,t), z_{i, \tau}(\omega,t) | \Lambda) \nonumber\\
+= & \displaystyle\sum_{i, \tau} p(\phi(\omega,t), \alpha(\omega,t) | z_{i, \tau}(\omega,t), \Lambda) \cdot p(z_{i, \tau}(\omega,t) | \Lambda) \label{eq:margi}
+\end{align}
+
+En injectant (\ref{eq:margi}) dans (\ref{eq:logvrai}) on obtient :
+\begin{align}
+ \mathcal{L}(\Lambda) = \displaystyle\sum_{\omega,t} \log \displaystyle\sum_{i, \tau} p(\phi(\omega,t), \alpha(\omega,t) | z_{i, \tau}(\omega,t), \Lambda) \cdot p(z_{i, \tau}(\omega,t) | \Lambda) \label{eq:logvmargi}
+\end{align}
+On suppose $\phi$ et $\alpha$ indépendants, et on modélise leur probabilité connaissant $z_{i,\tau}$ et $\Lambda$ par une gaussienne, on a donc :
+\begin{align}
+& p(\phi(\omega,t), \alpha(\omega,t) | z_{i, \tau}(\omega,t), \Lambda) \nonumber\\
+= & p(\phi(\omega,t) | z_{i, \tau}(\omega,t), \Lambda) \cdot p(\alpha(\omega,t) | z_{i, \tau}(\omega,t), \Lambda) \nonumber\\
+= & \mathcal{N}(\hat{\phi}(\omega,t;\tau) | \xi_{i,\tau}(\omega),\sigma^{2}_{i,\tau}(\omega)) \cdot \mathcal{N}(\alpha(\omega,t;\tau) | \mu_{i,\tau}(\omega),\eta^{2}_{i,\tau}(\omega)) \label{eq:modgauss}
+\end{align}
+On pose :
+\begin{equation}
+\psi_{i,\tau} \equiv  p(z_{i, \tau}(\omega,t) | \Lambda) \label{eq:psi}
+\end{equation}
+Et on retombe sur (m13) en injectant (\ref{eq:modgauss}) et (\ref{eq:psi}) dans (\ref{eq:logvmargi})
+\section{fonction auxiliaire}
+Pour alléger la notation dans cette section nous écrirons $\phi(\omega,t)$, $\alpha(\omega,t)$ et $z_{i, \tau}$ sans leurs dépendances en $(\omega,t)$.
+
+On cherche la différence entre la logvraisemblance actuelle et celle calculée au pas précédent $s$.
+\begin{align}
+& \mathcal{L}(\Lambda) - \mathcal{L}(\Lambda_s) & \nonumber \\
+= & \displaystyle\sum_{\omega,t} \log \displaystyle\sum_{i, \tau} p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda) - \displaystyle\sum_{\omega,t} \log p(\phi, \alpha | \Lambda_s) \nonumber\\
+= & \displaystyle\sum_{\omega,t} \log \displaystyle\sum_{i, \tau} p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda) \times \frac{p(z|\omega,\alpha,\Lambda_s)}{p(z|\omega,\alpha,\Lambda_s)}- \displaystyle\sum_{\omega,t} \log p(\phi, \alpha | \Lambda_s) \nonumber\\
+= & \displaystyle\sum_{\omega,t} \log \displaystyle\sum_{i, \tau} p(z|\omega,\alpha,\Lambda_s) \times \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\omega,\alpha,\Lambda_s)}- \displaystyle\sum_{\omega,t} \log p(\phi, \alpha | \Lambda_s) \nonumber\\
+\geq & \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\omega,\alpha,\Lambda_s) \times \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\omega,\alpha,\Lambda_s)}- \displaystyle\sum_{\omega,t} \log p(\phi, \alpha | \Lambda_s) \label{eq:jensen}
+\end{align}
+(\ref{eq:jensen}) correspond à la formule de Jensen. On rappelle que
+\begin{equation}
+\displaystyle \sum_{i,\tau} p(z|\omega,\alpha,\Lambda_s) = 1
+\end{equation}
+on peut donc factoriser et d'où (\ref{eq:jensen}) est égale à :
+\begin{align}
+& \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\omega,\alpha,\Lambda_s) \times \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\omega,\alpha,\Lambda_s)}- \displaystyle\sum_{\omega,t}\displaystyle\sum_{i, \tau} p(z|\omega,\alpha,\Lambda_s) \log p(\phi, \alpha | \Lambda_s) \nonumber \\
+= & \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\omega,\alpha,\Lambda_s) \times [ \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\omega,\alpha,\Lambda_s)}-\log p(\phi, \alpha | \Lambda_s) ] \nonumber \\
+= & 
+\end{align}
+
+\end{document}
