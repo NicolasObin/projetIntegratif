@@ -65,19 +65,28 @@ On cherche la différence entre la logvraisemblance actuelle et celle calculée 
 \begin{align}
 & \mathcal{L}(\Lambda) - \mathcal{L}(\Lambda_s) & \nonumber \\
 = & \displaystyle\sum_{\omega,t} \log \displaystyle\sum_{i, \tau} p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda) - \displaystyle\sum_{\omega,t} \log p(\phi, \alpha | \Lambda_s) \nonumber\\
-= & \displaystyle\sum_{\omega,t} \log \displaystyle\sum_{i, \tau} p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda) \times \frac{p(z|\omega,\alpha,\Lambda_s)}{p(z|\omega,\alpha,\Lambda_s)}- \displaystyle\sum_{\omega,t} \log p(\phi, \alpha | \Lambda_s) \nonumber\\
-= & \displaystyle\sum_{\omega,t} \log \displaystyle\sum_{i, \tau} p(z|\omega,\alpha,\Lambda_s) \times \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\omega,\alpha,\Lambda_s)}- \displaystyle\sum_{\omega,t} \log p(\phi, \alpha | \Lambda_s) \nonumber\\
-\geq & \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\omega,\alpha,\Lambda_s) \times \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\omega,\alpha,\Lambda_s)}- \displaystyle\sum_{\omega,t} \log p(\phi, \alpha | \Lambda_s) \label{eq:jensen}
+= & \displaystyle\sum_{\omega,t} \log \displaystyle\sum_{i, \tau} p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda) \times \frac{p(z|\phi,\alpha,\Lambda_s)}{p(z|\phi,\alpha,\Lambda_s)}- \displaystyle\sum_{\omega,t} \log p(\phi, \alpha | \Lambda_s) \nonumber\\
+= & \displaystyle\sum_{\omega,t} \log \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s)}- \displaystyle\sum_{\omega,t} \log p(\phi, \alpha | \Lambda_s) \nonumber\\
+\geq & \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s)}- \displaystyle\sum_{\omega,t} \log p(\phi, \alpha | \Lambda_s) \label{eq:jensen}
 \end{align}
 (\ref{eq:jensen}) correspond à la formule de Jensen. On rappelle que
-\begin{equation}
-\displaystyle \sum_{i,\tau} p(z|\omega,\alpha,\Lambda_s) = 1
-\end{equation}
+\begin{equation*}
+\displaystyle \sum_{i,\tau} p(z|\phi,\alpha,\Lambda_s) = 1
+\end{equation*}
 on peut donc factoriser et d'où (\ref{eq:jensen}) est égale à :
 \begin{align}
-& \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\omega,\alpha,\Lambda_s) \times \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\omega,\alpha,\Lambda_s)}- \displaystyle\sum_{\omega,t}\displaystyle\sum_{i, \tau} p(z|\omega,\alpha,\Lambda_s) \log p(\phi, \alpha | \Lambda_s) \nonumber \\
-= & \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\omega,\alpha,\Lambda_s) \times [ \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\omega,\alpha,\Lambda_s)}-\log p(\phi, \alpha | \Lambda_s) ] \nonumber \\
-= & 
+& \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s)}- \displaystyle\sum_{\omega,t}\displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \log p(\phi, \alpha | \Lambda_s) \nonumber \\
+= & \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times [ \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s)}-\log p(\phi, \alpha | \Lambda_s) ] \nonumber \\
+= & \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s) \cdot p(\phi, \alpha | \Lambda_s)}  \nonumber \\
+= & \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times [\log p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda) - \log p(z|\phi,\alpha,\Lambda_s) \cdot p(\phi, \alpha | \Lambda_s)] \nonumber
 \end{align}
-
+et si on regroupe ce qui ne dépend pas de $\Lambda$ sous le terme $k$ on obtient :
+\begin{equation*}
+k + \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \log p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)
+\end{equation*}
+puis en appliquant la loi de Bayes à l'intérieur du log
+\begin{equation*}
+k + \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \log p(\phi, \alpha, z_{i, \tau} | \Lambda)
+\end{equation*}
+et on retouve le $Q(\Lambda|\Lambda_s)$ de l'équation (m14)
 \end{document}
