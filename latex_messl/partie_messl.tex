@@ -5,16 +5,19 @@
 \usepackage{lmodern}
 \usepackage{amssymb}
 \usepackage{amsmath}
+\usepackage{textcomp}
 \usepackage[babel]{csquotes}
 \MakeAutoQuote{«}{»}
 \pagestyle{headings}
 
-\title{MESSL}
+\title{Notes sur MESSL}
 \author{jmatthieu}
 
 \begin{document}
 \maketitle
-Ce document accompagne l'article MESSL, il ne présente cependant pas tout. Les notations sont les mêmes sauf lorsque celà est précisé. Les équations du papier MESSL sont notées (m$N$) où $N$ correspond au numéro de l'équation dans le papier MESSL.
+Les notations sont les mêmes sauf lorsque celà est précisé. Les équations du papier MESSL sont notées (m$N$) où $N$ correspond au numéro de l'équation dans le papier MESSL.
+
+\section{Log-vraisemblance du modèle}
 
 Le modèle (noté $\Lambda$ au lieu de $\Theta$) que l'on veut estimer a pour paramètres (voir \textit{III. Parameter estimation from mixtures} et l'équation (m10) pour le détail) :
 \begin{equation*}
@@ -24,11 +27,11 @@ La probabilité de l'observation $\phi(\omega,t) ; \alpha(\omega,t)$ connaissant
 \begin{equation*}
 p(\phi(\omega,t), \alpha(\omega,t) | \Lambda)
 \end{equation*}
-La vraisemblance est donnée par (par définition) :
+La vraisemblance est donnée par (définition) :
 \begin{align*}
 L(\Lambda) = \displaystyle \prod_{\omega,t} p(\phi(\omega,t), \alpha(\omega,t) | \Lambda)
 \end{align*}
-Et la log-vraisemblance par (par définition) :
+Et la log-vraisemblance par (définition) :
 \begin{align}
 \mathcal{L}(\Lambda) = & \log L(\Lambda) \nonumber \\
  = & \log \displaystyle \prod_{\omega,t} p(\phi(\omega,t), \alpha(\omega,t) | \Lambda) \nonumber \\
@@ -58,7 +61,10 @@ On pose :
 \psi_{i,\tau} \equiv  p(z_{i, \tau}(\omega,t) | \Lambda) \label{eq:psi}
 \end{equation}
 Et on retombe sur (m13) en injectant (\ref{eq:modgauss}) et (\ref{eq:psi}) dans (\ref{eq:logvmargi})
-\section{fonction auxiliaire}
+
+
+\section{Fonction auxiliaire $Q$}
+
 Pour alléger la notation dans cette section nous écrirons $\phi(\omega,t)$, $\alpha(\omega,t)$ et $z_{i, \tau}$ sans leurs dépendances en $(\omega,t)$.
 
 On cherche la différence entre la logvraisemblance actuelle et celle calculée au pas précédent $s$.
@@ -69,24 +75,71 @@ On cherche la différence entre la logvraisemblance actuelle et celle calculée 
 = & \displaystyle\sum_{\omega,t} \log \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s)}- \displaystyle\sum_{\omega,t} \log p(\phi, \alpha | \Lambda_s) \nonumber\\
 \geq & \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s)}- \displaystyle\sum_{\omega,t} \log p(\phi, \alpha | \Lambda_s) \label{eq:jensen}
 \end{align}
-(\ref{eq:jensen}) correspond à la formule de Jensen. On rappelle que
+Le passage à (\ref{eq:jensen}) est l'application de la formule de Jensen, car
 \begin{equation*}
 \displaystyle \sum_{i,\tau} p(z|\phi,\alpha,\Lambda_s) = 1
 \end{equation*}
-on peut donc factoriser et d'où (\ref{eq:jensen}) est égale à :
+ce qui permet également de factoriser (\ref{eq:jensen}) pour obtenir :
 \begin{align}
 & \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s)}- \displaystyle\sum_{\omega,t}\displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \log p(\phi, \alpha | \Lambda_s) \nonumber \\
 = & \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times [ \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s)}-\log p(\phi, \alpha | \Lambda_s) ] \nonumber \\
-= & \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s) \cdot p(\phi, \alpha | \Lambda_s)}  \nonumber \\
+= & \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s) \cdot p(\phi, \alpha | \Lambda_s)}  \label{avantk} \\
 = & \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times [\log p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda) - \log p(z|\phi,\alpha,\Lambda_s) \cdot p(\phi, \alpha | \Lambda_s)] \nonumber
 \end{align}
 et si on regroupe ce qui ne dépend pas de $\Lambda$ sous le terme $k$ on obtient :
 \begin{equation*}
-k + \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \log p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)
+k + \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \cdot \log p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)
 \end{equation*}
-puis en appliquant la loi de Bayes à l'intérieur du log
+puis en appliquant la loi de Bayes à l'intérieur du log :
 \begin{equation*}
-k + \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \log p(\phi, \alpha, z_{i, \tau} | \Lambda)
+k + \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \cdot \log p(\phi, \alpha, z_{i, \tau} | \Lambda)
 \end{equation*}
-et on retouve le $Q(\Lambda|\Lambda_s)$ de l'équation (m14)
+on retouve bien l'équation (m14) :
+\begin{equation}
+Q(\Lambda|\Lambda_s) = k + \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \cdot \log p(\phi, \alpha, z_{i, \tau} | \Lambda) \label{Q}
+\end{equation}
+\section{M-step}
+On veut désormais maximiser $Q(\Lambda|\Lambda_s)$ par rapport à $\Lambda$, et l'équation (m15) pose :
+\begin{equation*}
+\nu_{i,\tau} \equiv p(z|\phi,\alpha,\Lambda_s)
+\end{equation*}
+Ce qui donne en injectant dans (\ref{Q}) et en écrivant ensuite l'espérance :
+\begin{align}
+Q(\Lambda|\Lambda_s) & = k + \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} \nu_{i,\tau} \cdot \log p(\phi, \alpha, z_{i, \tau} | \Lambda) \nonumber \\
+& = k + \displaystyle\sum_{\omega,t} \mathbb{E}_{\nu_{i,\tau}} [\log p(\phi, \alpha, z_{i, \tau} | \Lambda)] \label{Qexp}
+\end{align}
+On rappelle que $k$ ne dépend pas de $\Lambda$, on peut donc l'exclure de la maximisation par rapport à $\Lambda$, et ainsi :
+\begin{equation*}
+\hat\Lambda \leftarrow argmax_\Lambda \; \displaystyle\sum_{\omega,t} \mathbb{E}_{\nu_{i,\tau}} [\log p(\phi, \alpha, z_{i, \tau} | \Lambda)]
+\end{equation*}
+%\begin{align}
+%\nu_{i,\tau} & \equiv p(z|\phi,\alpha,\Lambda_s) \nonumber \\
+%& \propto p(z,\phi,\alpha|\Lambda_s) \nonumber \\
+%& = p(z| \Lambda_s) \cdot p(\phi | \Lambda_s) \cdot p(\alpha| \Lambda_s) \nonumber \\
+%& = \psi_{i,\tau} \cdot \mathcal{N}(\hat{\phi}(\omega,t;\tau) | \xi_{i,\tau}(\omega),\sigma^{2}_{i,\tau}(\omega)) \cdot \mathcal{N}(\alpha(\omega,t;\tau) | \mu_{i,\tau}(\omega),\eta^{2}_{i,\tau}(\omega)) \nonumber
+%\end{align}
+%La variable cachée binaire $z_{i,\tau}$ a pour espérance connaissant $\phi,\alpha,\Lambda_s$ :
+%\begin{align}
+%E_{\phi,\alpha,\Lambda_s}[z_{i,\tau}] & = p(z_{i,\tau} = 1 | \phi,\alpha,\Lambda_s) \times 1 + p(z_{i,\tau} = 0 | \phi,\alpha,\Lambda_s) \times 0 \nonumber \\
+%& = p(z_{i,\tau} = 1 | \phi,\alpha,\Lambda_s) \nonumber
+%\end{align}
+%\textrightarrow le calcul de $\nu_{i,\tau}$ donne l'espérance de $z_{i,\tau}$
+
+\section{E-step}
+%D'après la loi de Bayes :
+%\begin{equation*}
+%p(\phi, \alpha, z_{i, \tau} | \Lambda) = p(\phi,\alpha|\Lambda) \cdot p(z_{i,\tau} | \phi, \alpha, \Lambda)
+%\end{equation*}
+D'après (\ref{avantk}) :
+\begin{align}
+Q(\Lambda|\Lambda_s) & = \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s) \cdot p(\phi, \alpha | \Lambda_s)} \nonumber \\
+& = \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times [ \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s)}  - \log p(\phi, \alpha | \Lambda_s) ] \nonumber \\
+& = \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times [ \log \frac{p(\phi, \alpha, z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s)}  - \log p(\phi, \alpha | \Lambda_s) ] \nonumber \\
+& = k_1 + \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \log \frac{p(\phi, \alpha, z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s)} \nonumber
+\end{align}
+avec $k_1$ qui ne dépend pas de $\Lambda$. On introduit l'espérance et on a reconnu $\nu_{i,\tau}$ :
+\begin{align*}
+& k_1 + \displaystyle\sum_{\omega,t} \mathbb{E}_{\nu_{i,\tau}} [ \log \frac{p(\phi, \alpha, z_{i, \tau} | \Lambda)}{\nu_{i,\tau}}] \\
+= &
+\end{align*}
 \end{document}
