@@ -17,11 +17,18 @@ def StiffnessOn(proxy):
     proxy.stiffnessInterpolation(pNames, pStiffnessLists, pTimeLists)
 
 def changement(x_can,x_nao,y_can,y_nao,angle,sizeFactor):
+    # x_can et y_can positions actuelles du nao dans le canevas
+    # x_nao et y_nao le mouvement envoye au nao
+    # angle orientation actuelle du naro
+    # sizeFactor le rapport en pixel/metre 
     x_can = x_can + ( x_nao*np.sin(angle) + y_nao*np.cos(angle) ) * sizeFactor
     y_can = y_can + ( (-1)*y_nao*np.sin(angle) + x_nao * np.cos(angle) ) * sizeFactor
     return x_can, y_can
 
 def CorFleche (corX,corY,theta,tailleFleche):
+    # renvoie les coord de la fleche a dessiner
+    # renvoie : x_debut, y_debut, x_fin, y_fin
+    # tailleFleche la longueur de la fleche en pixel
     yF=tailleFleche*np.cos(theta)
     xF=tailleFleche*np.sin(theta)
     return corX,corY,corX+xF,corY+yF

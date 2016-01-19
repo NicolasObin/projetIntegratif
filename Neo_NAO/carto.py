@@ -1,122 +1,132 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from Tkinter import *
-from PIL import Image, ImageTk
-import sys
-import motion
-import time
-from naoqi import ALProxy
+from Tkinter import * 
 import numpy as np
+from subprocess import Popen, PIPE
+import time
 
-#Centré l'image au début PARAMETRES INITIAUX
-can_width = 1000
-can_height = 600
-sizeFac=1000
-sizeFleche = 15
-theta = 0
-
-# CREATION FENETRE TKINTER
-fenetre = Tk()
-fenetre['bg'] = 'darkgray' # background de la fenetre tkinter
-
-# une autre frame pour le canvas
-#frame_canvas = Frame(fenetre, borderwidth=2, relief=GROOVE)
-#frame_canvas.pack(side=BOTTOM, padx = 5, pady = 5)
-canvas = Canvas(fenetre, width = can_width, height = can_height, background = 'darkgray')
-canvas.pack()
-
-    
-def StiffnessOn(proxy):
-    # We use the "Body" name to signify the collection of all joints
-    pNames = "Body"
-    pStiffnessLists = 1.0
-    pTimeLists = 1.0
-    proxy.stiffnessInterpolation(pNames, pStiffnessLists, pTimeLists)
 
 def changement(x_can,x_nao,y_can,y_nao,angle,sizeFactor):
-    x_can = x_can + ( x_nao*np.sin(angle) + y_nao*np.cos(angle) ) * sizeFactor
-    y_can = y_can + ( (-1)*y_nao*np.sin(angle) + x_nao * np.cos(angle) ) * sizeFactor
+    # x_can et y_can positions actuelles du nao dans le canevas
+    # x_nao et y_nao la distance que le Nao va parcourir
+    # angle orientation actuelle du naro
+    # sizeFactor le rapport en pixel/metre 
+    y_can = y_can + ( x_nao*np.sin(angle) + y_nao*np.cos(angle) ) * sizeFactor
+    x_can = x_can + ( y_nao*np.sin(angle) + (-1)*x_nao * np.cos(angle) ) * sizeFactor
     return x_can, y_can
 
+
 def CorFleche (corX,corY,theta,tailleFleche):
+    # renvoie les coord de la fleche a dessiner
+    # renvoie : x_debut, y_debut, x_fin, y_fin
+    # tailleFleche la longueur de la fleche en pixel
     yF=tailleFleche*np.cos(theta)
     xF=tailleFleche*np.sin(theta)
     return corX,corY,corX+xF,corY+yF
 
+#creer les image du nao et de la fleche
 def frame_canv(PosX,PosY,widget,image,theta,sizeFleche):
-    widget.create_image(PosX,PosY, anchor = CENTER, image = image, state = NORMAL, tags = 'nao')
+    widget.create_image(PosX,PosY, image = image, state = NORMAL, tags = 'nao')
     xf_s,yf_s,xf_e,yf_e = CorFleche(PosX,PosY,theta,sizeFleche)
-    widget.create_line(xf_s,yf_s,xf_e,yf_e,arrow = LAST,fill= 'orange', tags = 'fleche')
+    widget.create_line(xf_s,yf_s,xf_e,yf_e,arrow = LAST,fill= 'red', tags = 'fleche')
+
+#methode permetant de choisir la direction vers laquelle le NAO avance
+def direction(fen, canevas, x, y, theta, dx, dy, Theta, sizeFac):
+    print "direction"
+    #calcul des nouvelles coordonnées du NAO avec pos_act + déplacement referentiel canevas
+    xx, yy=changement(x, dy, y, dx, Theta, sizeFac) 
+    print x, xx
+    print y, yy
+    #choix du type de mouvement simple
+    
+    #if theta != Theta:
+
+    if y > yy : 
+        print "haut"
+        theta = theta + Theta
+        rotate(fen, canevas, x, y, theta, sizeFac) 
+        haut(fen, canevas, x, y, xx, yy, Theta, sizeFac)
+    elif y < yy:
+        print "bas", dx, dy
+        theta = theta + Theta
+        rotate(fen, canevas, x, y, theta, sizeFac) 
+        bas(fen, canevas, x, y, xx, yy, Theta, sizeFac)
+    elif x > xx:
+        print "gauche"
+        theta = theta + Theta
+        rotate(fen, canevas, x, y, theta, sizeFac) 
+        gauche(fen, canevas, x, y, xx, yy, Theta, sizeFac)
+    elif x < xx: 
+        print "droite"
+        theta = theta + Theta
+        rotate(fen, canevas, x, y, theta, sizeFac) 
+        droite(fen, canevas, x, y, xx, yy, Theta, sizeFac) 
 
 
-def initFenetre(corX, corY):
+    #si mouvement suivant un angle on fait
+    # elif y >yy and x > xx
 
-    # image nao    
-    tetenao = PhotoImage(file ="naoHead.png") # attention si ya une instance Tkinter encore ouverte ça chie
-     #Position initiale 
-    frame_canv(corX,corY,canvas,tetenao,theta,sizeFleche)
-    fenetre.mainloop() # doit etre a la fin car doit garder la main
+    
+#direction gauche
+def gauche(fen, canevas, x, y, xx, yy, theta, sizeFleche):
+    if x > xx:
+        x = x - 1
+        x_deb, y_deb, x_fin, y_fin = CorFleche(x, y, theta,sizeFleche)
+        canevas.coords('nao', x, y)
+        canevas.coords('fleche', x_deb, y_deb, x_fin, y_fin)
+        #fen.after(50, gauche)
+        time.sleep(0.01)
+        gauche(fen, canevas, x, y, xx, yy, theta, sizeFleche)
+ 
+#direction droite
+def droite(fen, canevas, x, y, xx, yy, theta, sizeFleche):#dx, dy, theta, tag1, tag2):
+    if x < xx:        
+        x = x + 1
+        x_deb, y_deb, x_fin, y_fin = CorFleche(x, y, theta,sizeFleche)
+        canevas.coords('nao', x, y)
+        canevas.coords('fleche', x_deb, y_deb, x_fin, y_fin)
+        #fen.after(50, droite)
+        time.sleep(0.01)
+        droite(fen, canevas, x, y, xx, yy, theta, sizeFleche)
+
+#direction haut
+def haut(fen, canevas, x, y, xx, yy, theta, sizeFleche):
+    if y > yy:
+        y = y - 1
+        x_deb, y_deb, x_fin, y_fin = CorFleche(x, y, theta,sizeFleche)
+        canevas.coords('nao', x, y)
+        canevas.coords('fleche', x_deb, y_deb, x_fin, y_fin)
+        #fen.after(50, haut)#dx, dy, theta, tag1, tag2))
+        time.sleep(0.01)
+        haut(fen, canevas, x, y, xx, yy, theta, sizeFleche)
+ 
+#direction bas
+def bas(fen, canevas, x, y, xx, yy, theta, sizeFleche):
+    if y < yy:  
+        y = y + 10
+        x_deb, y_deb, x_fin, y_fin = CorFleche(x, y, theta,sizeFleche)
+        canevas.coords('nao', x, y)
+        canevas.coords('fleche', x_deb, y_deb, x_fin, y_fin)
+        #print y 
+        #fen.after(50, bas(fen, canevas, x, y, xx, yy, theta, sizeFleche))
+        time.sleep(0.01)
+        bas(fen, canevas, x, y, xx, yy, theta, sizeFleche)
+
+#Rotation 
+def rotate(fen, canevas, x, y, theta, sizeFleche):
+    x_deb, y_deb, x_fin, y_fin = CorFleche(x, y, theta,sizeFleche)
+    canevas.coords('nao', x, y)
+    canevas.coords('fleche', x_deb, y_deb, x_fin, y_fin)
+    #fen.after(50, bas)#dx, dy, theta, tag1, tag2))
 
 
-def anime():
-   corx=100
-   cory=100
-   if corx<=1000:
-      corx=corx+10
-      canvas.coords('nao',corx,cory)
-      fenetre.after(10, anime)
+#initialise le canevas et la fenetre
+def Init(fen, canevas, tetenao, x, y, dx, dy, nTheta):
+    #creation de la fenetre    
+    fen.title('animation du NAO')
+    canevas.grid(row =1, column =2, rowspan =200, padx=5, pady=5)
+    #affiche la tete dans la fentre
+    frame_canv(x,y,canevas,tetenao,0,15)
+ 
       
-
-"""
-def Marcher(X, Y, corX, corY):
-    xx,yy = changement(corX,X,corY,Y,theta,sizeFac)
-    animeX(xx, corX, corY)
-  """
-
-def main(robotIP):
-    
-    corX = 200#can_width/2
-    corY = 200#can_height/2
-    initFenetre(corX, corY)
-
-    anime()    
-
-    """
-    # 1ER DEPLACEMENT
-	# created a walk task
-    x = 0.2
-    y = 0
-    theta_goal = 0
-    motionProxy.post.moveTo(x, y, theta_goal)
-	# wait that the move process start running
-    time.sleep(0.1)
-
-    #Position initiale
-    frame_canv(corX,corY,'P0',canvas,tetenao,theta,sizeFleche)
-    xx,yy = changement(corX,x,corY,y,theta,sizeFac)
-    
-    # update des param
-    corX = xx
-    corY = yy
-    theta = theta + theta_goal
-
-    #Position finale
-    frame_canv(xx,yy,'P1',canvas,tetenao,theta,sizeFleche)
-    #canvas.tag_lower(objet) mettre en arriére plan
-    canvas.tag_lower(canvas.create_rectangle(can_width, can_height, xx, yy, fill="orange"))
-    canvas.pack()
-    fenetre.update()
-
-    # faire vivre la fenetre Tkinter"""
-
-
-if __name__ == "__main__":
-    robotIp = 'nao.local'
-
-    if len(sys.argv) <= 1:
-        print "Usage python Cartographie.py robotIP (optional default: nao.local)"
-    else:
-        robotIp = sys.argv[1]
-
-    main(robotIp)

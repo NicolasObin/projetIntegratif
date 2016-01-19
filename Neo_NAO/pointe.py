@@ -11,6 +11,6 @@ PORT = 9559
 
 Audio_recording.record(robotIP)
 [maxi, mean]= loca.localise()
-direction.moveTo(robotIP, PORT, mean)
+X, Y, Theta = direction.moveTo(robotIP, PORT, mean)
 
 

@@ -7,6 +7,8 @@ import motion
 import time
 from naoqi import ALProxy
 import numpy as np
+from subprocess import Popen, PIPE
+
 
 def Init (robotIP, PORT):
     # Init proxies.
@@ -31,6 +33,7 @@ def StiffnessOn(proxy):
     pTimeLists = 1.0
     proxy.stiffnessInterpolation(pNames, pStiffnessLists, pTimeLists)
 
+#fonction qui permet de faire tourner le robot 
 def Rotation(toto, motionProxy):
     if toto == 1:
         #gauche = 90 
@@ -42,14 +45,21 @@ def Rotation(toto, motionProxy):
         X = 0.0
         Y = 0.0
         Theta = -np.pi/2
+    print "rotate /n"
     motionProxy.post.moveTo(X, Y, Theta)
+    return Theta
 
+#fonction qui permet de faire marcher le robot 
 def Marcher(motionProxy):
     #marche sur 1m20
+    print "marcher"
     X = 0.2
     Y = 0.0
     Theta = 0
-    motionProxy.post.moveTo(X, Y, Theta)       
+    #carto.direction(X, Y, Theta)
+    motionProxy.post.moveTo(X, Y, Theta) 
+    return X, Y
+      
 
 def paramNao(robotIP, motionProxy, postureProxy):
     
@@ -73,16 +83,23 @@ def paramNao(robotIP, motionProxy, postureProxy):
 
 
 def moveTo(robotIP, PORT, toto):
-    
     [motionProxy, postureProxy] = Init(robotIP, PORT)
+    s = ALProxy("ALTextToSpeech", 'nao.local', 9559)
+    """
+    if toto == 1:
+        s.say ("je pense que tu es à ma gauche")
+    else:
+        s.say ("tu es à ma droite")
+    print toto
     paramNao(robotIP, motionProxy, postureProxy)
-    Rotation(toto, motionProxy)
-    
-    time.sleep(3.5)
-    Marcher(motionProxy)
-    motionProxy.moveInit()
+     """
+    theta = Rotation(toto, motionProxy)
+    time.sleep(3.5)     
+   
+    x, y = Marcher(motionProxy)
 
-    #postureProxy.goToPosture("StandInit", 0.5)
+    #motionProxy.moveInit()
+    return x, y, theta
 
 
 

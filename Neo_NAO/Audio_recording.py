@@ -13,7 +13,6 @@ import tfct
 """
 from importFiles import command_scp 
 
-
 from naoqi import ALProxy
 from naoqi import ALBroker
 from naoqi import ALModule
