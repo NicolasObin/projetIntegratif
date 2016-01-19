@@ -37,17 +37,11 @@ imagesc(abs(R))
 %Construction du delta
 freq=[(1:N/2) ((-N/2)+1:-1)]*(2*pi/(N)); %frequence sous forme de pulsation
 lw0=repmat(freq,[size(R,1) 1]);
-%Calcul des 0
-zero_data=(stft_data_chan1~=0).*(stft_data_chan2~=0);
 %delta
 delta=angle(R)./lw0;
-%Correction des 0
-%delta(zero_data)=0;
 
 %Construction du alpha
 a=abs(R);
-%Correction des 0
-%a(zero_data)=1;
 %alpha
 alpha=(a-(1./a));
 
@@ -100,11 +94,11 @@ bar3(Hf)
 
 
 %% Detection des sources
-%Detection des pics définit comme étant 3/4 du max
-pic=Hf>max(Hf(:))*3/4;
+%Detection des pics définit comme étant 2/4 du max
+pic=Hf>max(Hf(:))*2/4;
 
 %labelisation
-L = bwlabel(pic)
+L = bwlabel(pic);
 
 figure(5)
 imagesc(L)
@@ -115,20 +109,21 @@ numsources=max(L(:));
 for i=1:1:numsources
     %row=alpha
     %column=delta
-    [r, c] = find(L==i)
+    [r, c] = find(L==i);
     max_ind_alpha=round(mean(r(:)));
     max_ind_delta=round(mean(c(:)));
     %Stockage des centres
     peak_alpha(i,1)=maxa-(abins-max_ind_alpha)*(maxa*2/abins);
     peak_delta(i,1)=maxd-(dbins-max_ind_delta)*(maxd*2/dbins);
+    
     %Stockage des puissances
-    peak_alpha(i,2)=Hf(max_ind_alpha,max_ind_delta);
+    peak_alpha(i,2)=Hf(max_ind_alpha,max_ind_delta)
     peak_delta(i,2)=Hf(max_ind_alpha,max_ind_delta);
 end
 
 %Rangement par ordre de puissance
-peak_alpha=sortrows(peak_alpha,2);
-peak_delta=sortrows(peak_delta,2);
+peak_alpha=sortrows(peak_alpha,2)
+peak_delta=sortrows(peak_delta,2)
 
 %nettoyage de la puissance
 peak_alpha=peak_alpha(:,1);
@@ -161,7 +156,7 @@ est=zeros(numsources,length(audio_time_data(:,1)));%demixtures
 
 for i=1:numsources
     mask=(bestind==i);
-    fft_synth=[zeros(1,size(stft_data_chan1,1))' ((stft_data_chan1+peaka(i)*exp(sqrt(-1)*lw0*peak_delta(i)).*stft_data_chan2)./(1+peaka(i)^2)).*mask];
+    fft_synth=[zeros(1,size(stft_data_chan1,1))' ((stft_data_chan2+peaka(i)*exp(sqrt(-1)*lw0*peak_delta(i)).*stft_data_chan2)./(1+peaka(i)^2)).*mask];
     fft_synth=fft_synth(:,1:513)';
     esti=istft(fft_synth,M,N,fs);
     est(i,:)=esti(1:length(audio_time_data(:,1)))';
@@ -169,6 +164,6 @@ for i=1:numsources
     %add back into the demix a little bit of the mixture
     %as that eliminates most of the masking artifacts
     soundsc(est(i,:),fs);% original code seems to have missed the transpose play demixture
-    pause
+    pause 
 end
 
