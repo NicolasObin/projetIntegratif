@@ -15,7 +15,7 @@
 
 \begin{document}
 \maketitle
-Les notations sont les mêmes sauf lorsque celà est précisé. Les équations du papier MESSL sont notées (m$N$) où $N$ correspond au numéro de l'équation dans le papier MESSL.
+Les notations sont les mêmes sauf lorsque précisé. Les équations du papier MESSL sont notées (m$N$) où $N$ correspond au numéro de l'équation dans le papier MESSL.
 
 \section{Log-vraisemblance du modèle}
 
@@ -98,6 +98,37 @@ on retouve bien l'équation (m14) :
 \begin{equation}
 Q(\Lambda|\Lambda_s) = k + \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \cdot \log p(\phi, \alpha, z_{i, \tau} | \Lambda) \label{Q}
 \end{equation}
+
+\section{E-step}
+%D'après la loi de Bayes :
+%\begin{equation*}
+%p(\phi, \alpha, z_{i, \tau} | \Lambda) = p(\phi,\alpha|\Lambda) \cdot p(z_{i,\tau} | \phi, \alpha, \Lambda)
+%\end{equation*}
+D'après (\ref{avantk}) :
+\begin{align}
+Q(\Lambda|\Lambda_s) & = \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s) \cdot p(\phi, \alpha | \Lambda_s)} \nonumber \\
+& = \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times [ \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s)}  - \log p(\phi, \alpha | \Lambda_s) ] \nonumber \\
+& = \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times [ \log \frac{p(\phi, \alpha, z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s)}  - \log p(\phi, \alpha | \Lambda_s) ] \nonumber \\
+& = k_1 + \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \log \frac{p(\phi, \alpha, z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s)} \nonumber
+\end{align}
+avec $k_1$ qui ne dépend pas de $\Lambda$. Si on ne s'intéresse qu'au second terme et qu'on introduit l'espérance (on a reconnu $\nu_{i,\tau}$) :
+\begin{align*}
+& \displaystyle\sum_{\omega,t} \mathbb{E}_{\nu_{i,\tau}} [ \log \frac{p(\phi, \alpha, z_{i, \tau} | \Lambda)}{\nu_{i,\tau}}] \\
+= & \displaystyle\sum_{\omega,t} \mathbb{E}_{\nu_{i,\tau}} [ \log \frac{p(\phi, \alpha | \Lambda) \cdot p(z_{i, \tau} |\phi, \alpha, \Lambda)}{\nu_{i,\tau}}] \\
+= & \displaystyle\sum_{\omega,t} \mathbb{E}_{\nu_{i,\tau}} [ \log \frac{p(\phi, \alpha | \Lambda) \cdot p(z_{i, \tau} |\phi, \alpha, \Lambda)}{\nu_{i,\tau}}] \\
+= & \displaystyle\sum_{\omega,t} \mathbb{E}_{\nu_{i,\tau}} [\log p(\phi, \alpha | \Lambda) + \log \frac{p(z_{i, \tau} |\phi, \alpha, \Lambda)}{\nu_{i,\tau}}]
+\end{align*}
+Comme le premier log ne dépend pas de $z_{i,\tau}$ :
+\begin{align*}
+& \displaystyle\sum_{\omega,t} \log p(\phi, \alpha | \Lambda) + \mathbb{E}_{\nu_{i,\tau}} [\log \frac{p(z_{i, \tau} |\phi, \alpha, \Lambda)}{\nu_{i,\tau}}] \\
+= & \displaystyle\sum_{\omega,t} \log p(\phi, \alpha | \Lambda) - \mathbb{E}_{\nu_{i,\tau}} [\log \frac{\nu_{i,\tau}}{p(z_{i, \tau} |\phi, \alpha, \Lambda)}] \\
+\end{align*}
+Le second terme ressemble fortement à une divergence KL, donc pour maximiser le tout il faut que l'espérance soit la plus petite possible ce qui est obtenu pour :
+\begin{equation}
+\hat\nu_{i,\tau} \leftarrow p(z_{i, \tau} |\phi, \alpha, \Lambda) \label{Estep}
+\end{equation}
+Et on comprend pourquoi (m15).
+
 \section{M-step}
 On veut désormais maximiser $Q(\Lambda|\Lambda_s)$ par rapport à $\Lambda$, et l'équation (m15) pose :
 \begin{equation*}
@@ -125,21 +156,4 @@ On rappelle que $k$ ne dépend pas de $\Lambda$, on peut donc l'exclure de la ma
 %\end{align}
 %\textrightarrow le calcul de $\nu_{i,\tau}$ donne l'espérance de $z_{i,\tau}$
 
-\section{E-step}
-%D'après la loi de Bayes :
-%\begin{equation*}
-%p(\phi, \alpha, z_{i, \tau} | \Lambda) = p(\phi,\alpha|\Lambda) \cdot p(z_{i,\tau} | \phi, \alpha, \Lambda)
-%\end{equation*}
-D'après (\ref{avantk}) :
-\begin{align}
-Q(\Lambda|\Lambda_s) & = \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s) \cdot p(\phi, \alpha | \Lambda_s)} \nonumber \\
-& = \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times [ \log \frac{p(\phi, \alpha | z_{i, \tau}, \Lambda) \cdot p(z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s)}  - \log p(\phi, \alpha | \Lambda_s) ] \nonumber \\
-& = \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times [ \log \frac{p(\phi, \alpha, z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s)}  - \log p(\phi, \alpha | \Lambda_s) ] \nonumber \\
-& = k_1 + \displaystyle\sum_{\omega,t} \displaystyle\sum_{i, \tau} p(z|\phi,\alpha,\Lambda_s) \times \log \frac{p(\phi, \alpha, z_{i, \tau} | \Lambda)}{p(z|\phi,\alpha,\Lambda_s)} \nonumber
-\end{align}
-avec $k_1$ qui ne dépend pas de $\Lambda$. On introduit l'espérance et on a reconnu $\nu_{i,\tau}$ :
-\begin{align*}
-& k_1 + \displaystyle\sum_{\omega,t} \mathbb{E}_{\nu_{i,\tau}} [ \log \frac{p(\phi, \alpha, z_{i, \tau} | \Lambda)}{\nu_{i,\tau}}] \\
-= &
-\end{align*}
 \end{document}
