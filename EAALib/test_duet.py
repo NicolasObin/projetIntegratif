@@ -20,8 +20,8 @@ maxa=1;
 maxd=4;
 
 #Nombre de bin pour alpha et delta
-abins=50;
-dbins=100;
+abins=500;
+dbins=1000;
 
 
 ### Code DUET
@@ -59,7 +59,7 @@ Hf=scipy.ndimage.filters.correlate(H,filt)
 
 ## Detection des sources
 #Detection des pics définits comme étant 2/4 du max
-pic=Hf>np.max(Hf)*2/4;
+pic=Hf>np.max(Hf)*3/4;
 
 #Labelisation
 label, numsources =scipy.ndimage.measurements.label(pic)
@@ -85,13 +85,16 @@ peaka=(peak_alpha+np.sqrt(4+peak_alpha**2))/2;
 # Assigne chaque frame temps-frequence (frame du spectrogramme) au pic le plus proche dans l'espace des phase/amplitude
 # On partitionne donc le spectrogramme en source
 
-bestsofar=np.Inf*np.ones(c0_stft.shape);
-bestind=np.zeros(c0_stft.shape);
+score=np.zeros((c0_stft.shape[0],c0_stft.shape[1],numsources));
+bestind=np.zeros((c0_stft.shape[0],c0_stft.shape[1],numsources));
 for i in range(0,numsources) :
-    score=np.abs(peaka[i]*np.exp(-1j*lw0*peak_delta[i])*c0_stft-c1_stft)**2/(1+peaka[i]**2);
-    mask=(score<bestsofar);
-    bestind[mask]=i;
-    bestsofar[mask]=score[mask];
+    score[:,:,i]=np.abs(peaka[i]*np.exp(-1j*lw0*peak_delta[i])*c0_stft-c1_stft)**2/(1+peaka[i]**2);
+
+max_score=score.max(axis=2)
+
+for i in range(0,numsources) :
+    bestind[:,:,i]=(score[:,:,i]>(np.max(score[:,:,i])*1/1000))*(score[:,:,i]==max_score)
+
 
 ##Reconstitution des sources
 # Then you create a binary mask (1 for each time-frequency point belonging to my source, 0 for all other points)
@@ -104,15 +107,19 @@ init=1;
 for i in range(0,numsources) :
 
     #Séparation des sources
-    mask=(bestind==i);
+    mask=bestind[:,:,i];
 
     #Application des masques
     #Pas bianire
     #c0_stft_synth=((c0_stft+peaka[i]*np.exp(-1j*lw0*peak_delta[i])*c1_stft)/(1+peaka[i]**2))*mask;
     #c1_stft_synth=((c1_stft+peaka[i]*np.exp(-1j*lw0*peak_delta[i])*c1_stft)/(1+peaka[i]**2))*mask;
     #Binaire
-    c0_stft_synth=c0_stft*mask
+	c0_stft_synth=c0_stft*mask
     c1_stft_synth=c1_stft*mask
+
+    #Application sur la magnitude uniquement
+    #c0_stft_synth=np.abs(c0_stft*mask)*(np.exp(1j*np.angle(c0_stft)))
+    #c1_stft_synth=np.abs(c1_stft*mask)*(np.exp(1j*np.angle(c1_stft)))
 
     #Rajout de la omposante continue trouquée précédemment 
     zero_pad=np.zeros([c0_stft.shape[0],1])
@@ -153,8 +160,9 @@ for i in range(0,numsources) :
     
     #Ecriture   
     wav.write('canal0_synth_src' + str(i) +'.wav',fs,canal_stereo_synth)
-    
 
+#plt.imshow(label)
+#plt.show()
 
 
 
