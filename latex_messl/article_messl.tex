@@ -1,0 +1,36 @@
+\documentclass[a4paper,12pt,twocols]{article}
+\usepackage[T1]{fontenc}
+\usepackage[frenchb]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[babel]{csquotes}
+\MakeAutoQuote{«}{»}
+\pagestyle{headings}
+
+\title{Bout sur MESSL}
+\author{jmatthieu}
+
+\begin{document}
+\maketitle
+
+\section{introduction}
+MESSL incorpore une technique de séparation de sources basée sur un masquage temps-fréquence, en regroupant les points temps-fréquence selon les indices inter-auraux de différence de phase et de niveau. L'hypothèse est faite qu'un point temps-fréquence n'est dominé que par une seule source, cette supposition est généralement valable pour les mixtures de signaux de parole [cite1] Le système décrit chaque source par un modèle statistique des indices inter-auraux. C'est lors de cette modélisation que l'algorithme EM (Expectation-Maximization) [cite2] est utilisé.
+\section{modèle}
+Nous présupposons l'existence de $i$ sources, et nous discrétisons les décalages de phases possibles, notés $\tau$. Les indices ILD et IPD sont modélisés par des gaussiennes, et sont supposés conditionnellements indépendants.
+$$ formule des modeles,eq5a8$$
+Faire un bout sur l'algo EM/ mise en place et equations.
+Puis cela permet d'extraire le masque
+$$equation26$$
+Celui ci peut être amélioré en ajoutant des présupposés sur les sources mais cela n'a pas été abordé.
+
+\section{biblio}
+cite1 \\ O. Yilmaz and S. Rickard, “Blind separation of speech mixtures via
+time-frequency masking,” IEEE Trans. Signal Process., vol. 52, no. 7,
+pp. 1830–1847, July 2004.
+
+
+cite2 \\
+Gaussian mixture models and the EM algorithm, Ramesh Sridharan\\
+The EM algorithm : a short tutorial, Sean Borman\\
+CS229 lecture notes, Stanford University, Andrew Ng\\
+\end{document}
