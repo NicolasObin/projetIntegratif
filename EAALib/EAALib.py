@@ -133,6 +133,114 @@ def compute_angle(canal1, canal2 , fs ,c, d):
 
     return sort_stack_data
 
+#Separation Duet
+def compDuet(canal0,canal1,N,hop,p,q,maxa,maxd,abins,dbins,rejet_max_pic,rejet_max_score):
+
+    #Construction de la matrice temps-fréquence
+    c0_stft=stft(canal0,N,hop)
+    c1_stft=stft(canal1,N,hop)
+
+    #Suppression de la composante continue
+    c0_stft=scipy.delete(c0_stft,0,1)
+    c1_stft=scipy.delete(c1_stft,0,1)
+
+    ##Histogramme
+    #Calcul de la matrice inter-aurale
+    R=matia(c0_stft,c1_stft)
+
+    #Calcul du alpha, du delta et de la matrice de frequence
+    alpha, delta, lw0 = alphadelta(R,N)
+
+    #Calcul de l'histogramme
+    H=histDuet(c0_stft,c1_stft,alpha,delta,lw0,p,q,maxa,maxd,abins,dbins)
+
+    #Filtrage
+    filt=np.ones((4,4))*(1/16)
+    Hf=scipy.ndimage.filters.correlate(H,filt)
+
+    ## Detection des sources
+    pic=Hf>np.max(Hf)*rejet_max_pic;
+
+    #Labelisation
+    label, numsources =scipy.ndimage.measurements.label(pic)
+
+    #Initialisation du Tableau des pics
+    peak_alpha=np.zeros((numsources,1))
+    peak_delta=np.zeros((numsources,1))
+    #Remplissage du tableau des pics
+    for i in range(0,numsources) :
+        #row=alpha
+        #column=delta
+        [r, c] = np.where(label==i+1);
+        max_ind_alpha=np.round(np.mean(r));
+        max_ind_delta=np.round(np.mean(c));
+        #Stockage des centres
+        peak_alpha[i,0]=maxa-(abins-(max_ind_alpha+1))*(maxa*2/abins);
+        peak_delta[i,0]=maxd-(dbins-(max_ind_delta+1))*(maxd*2/dbins);
+
+    #Convertion de alpha vers a
+    peaka=(peak_alpha+np.sqrt(4+peak_alpha**2))/2;
+
+    ##Creation des masques
+    # Assigne chaque frame temps-frequence (frame du spectrogramme) au pic le plus proche dans l'espace des phase/amplitude
+    # On partitionne donc le spectrogramme en source
+
+    score=np.zeros((c0_stft.shape[0],c0_stft.shape[1],numsources));
+    bestind=np.zeros((c0_stft.shape[0],c0_stft.shape[1],numsources));
+    for i in range(0,numsources) :
+        score[:,:,i]=np.abs(peaka[i]*np.exp(-1j*lw0*peak_delta[i])*c0_stft-c1_stft)**2/(1+peaka[i]**2);
+
+    max_score=score.max(axis=2)
+
+    for i in range(0,numsources) :
+        bestind[:,:,i]=(score[:,:,i]>(np.max(score[:,:,i])*rejet_max_score))*(score[:,:,i]==max_score)
 
 
+    ##Reconstitution des sources
+    # Then you create a binary mask (1 for each time-frequency point belonging to my source, 0 for all other points)
+    # Mask the spectrogram with the mask created in step 7.
 
+    c0_stft_synth_array=np.zeros((c0_stft.shape[0],N,numsources),dtype=np.complex_)
+    c1_stft_synth_array=np.zeros((c0_stft.shape[0],N,numsources),dtype=np.complex_)
+
+    init=1;
+    for i in range(0,numsources) :
+
+        #Séparation des sources
+        mask=bestind[:,:,i];
+
+        #Application des masques
+        #Pas bianire
+        #c0_stft_synth=((c0_stft+peaka[i]*np.exp(-1j*lw0*peak_delta[i])*c1_stft)/(1+peaka[i]**2))*mask;
+        #c1_stft_synth=((c1_stft+peaka[i]*np.exp(-1j*lw0*peak_delta[i])*c1_stft)/(1+peaka[i]**2))*mask;
+        #Binaire
+        c0_stft_synth=c0_stft*mask
+        c1_stft_synth=c1_stft*mask
+
+        #Rajout de la omposante continue trouquée précédemment 
+        zero_pad=np.zeros([c0_stft.shape[0],1])
+        c0_stft_synth=np.column_stack((zero_pad,c0_stft_synth))
+        c1_stft_synth=np.column_stack((zero_pad,c1_stft_synth))
+
+        #Stockage
+        c0_stft_synth_array[:,:,i]=c0_stft_synth[:,:]
+        c1_stft_synth_array[:,:,i]=c1_stft_synth[:,:]
+
+    #Génération des indices pour la puissance
+    ind_p=np.zeros((numsources,2))
+    ind_p[:,0]=np.arange(0,numsources,1)
+    for i in range(0,numsources) :
+        ind_p[i,1]=np.sqrt(np.abs(np.sum(c0_stft_synth_array[:,:,i]**2)/c0_stft.shape[0]**2))
+
+    #Tri des indices selon la puissance
+    ind_p= ind_p[np.argsort(ind_p[:,1])]
+
+    #Tri du tableau de spectrogramme
+    c0_stft_synth_sorted_array=c0_stft_synth_array
+    c1_stft_synth_sorted_array=c0_stft_synth_array
+    for i in range(0,numsources) :
+        c0_stft_synth_sorted_array[:,:,i]=c0_stft_synth_array[:,:,ind_p[i,0]]
+        c1_stft_synth_sorted_array[:,:,i]=c1_stft_synth_array[:,:,ind_p[i,0]]
+
+    return c0_stft_synth_sorted_array, c1_stft_synth_sorted_array, numsources
+        

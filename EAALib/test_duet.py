@@ -5,25 +5,6 @@ import scipy.ndimage
 import EAALib as eaa
 import matplotlib.pyplot as plt
 
-
-#%% PARAMETRES %%
-N = 1024;  #Taille de fenetre
-hop = 512; #Taille du saut
-
-##Paramètre de l'histogramme
-#Pondération (Par défaut)
-p=1
-q=0
-
-#Limites pour alpha, delta dans l'histogramm
-maxa=1;
-maxd=4;
-
-#Nombre de bin pour alpha et delta
-abins=500;
-dbins=1000;
-
-
 ### Code DUET
 ## Preparation de l'audio
 #Signal stereo
@@ -33,121 +14,34 @@ fs, data = wav.read('1.wav')
 canal0=data[:,0]
 canal1=data[:,1]
 
-#Construction de la matrice temps-fréquence
-c0_stft=eaa.stft(canal0,N,hop)
-c1_stft=eaa.stft(canal1,N,hop)
+#%% PARAMETRES %%
+N = 1024;  #Taille de fenetre STFT
+hop = 512; #Taille du saut STFT
 
-#Suppression de la composante continue
-#c0_con=c0_stft[:,0]
-#c1_con=c1_stft[:,0]
-c0_stft=scipy.delete(c0_stft,0,1)
-c1_stft=scipy.delete(c1_stft,0,1)
+##Paramètre de l'histogramme DUET
+#Pondération (Par défaut)
+p=1
+q=0
 
-##Histogramme
-#Calcul de la matrice inter-aurale
-R=eaa.matia(c0_stft,c1_stft)
+#Limites pour alpha, delta dans l'histogramme DUET (Par défaut)
+maxa=1;
+maxd=4;
 
-#Calcul du alpha, du delta et de la matrice de frequence
-alpha, delta, lw0 = eaa.alphadelta(R,N)
+#Nombre de bin pour alpha et delta dans l'histogramme DUET
+abins=500;
+dbins=1000;
 
-#Calcul de l'histogramme
-H=eaa.histDuet(c0_stft,c1_stft,alpha,delta,lw0,p,q,maxa,maxd,abins,dbins)
+#on definit un pic comme étant supérieur à 7/10 du pic max
+rejet_max_pic=7/10
 
-#Filtrage
-filt=np.ones((4,4))*(1/16)
-Hf=scipy.ndimage.filters.correlate(H,filt)
+#on rejet un point de la STFT s'il ne fait pas au moins 1/100 du score max
+rejet_max_score=1/1000
 
-## Detection des sources
-#Detection des pics définits comme étant 2/4 du max
-pic=Hf>np.max(Hf)*3/4;
-
-#Labelisation
-label, numsources =scipy.ndimage.measurements.label(pic)
-
-#Initialisation du Tableau des pics
-peak_alpha=np.zeros((numsources,1))
-peak_delta=np.zeros((numsources,1))
-#Remplissage du tableau des pics
-for i in range(0,numsources) :
-    #row=alpha
-    #column=delta
-    [r, c] = np.where(label==i+1);
-    max_ind_alpha=np.round(np.mean(r));
-    max_ind_delta=np.round(np.mean(c));
-    #Stockage des centres
-    peak_alpha[i,0]=maxa-(abins-(max_ind_alpha+1))*(maxa*2/abins);
-    peak_delta[i,0]=maxd-(dbins-(max_ind_delta+1))*(maxd*2/dbins);
-
-#Convertion de alpha vers a
-peaka=(peak_alpha+np.sqrt(4+peak_alpha**2))/2;
-
-##Creation des masques
-# Assigne chaque frame temps-frequence (frame du spectrogramme) au pic le plus proche dans l'espace des phase/amplitude
-# On partitionne donc le spectrogramme en source
-
-score=np.zeros((c0_stft.shape[0],c0_stft.shape[1],numsources));
-bestind=np.zeros((c0_stft.shape[0],c0_stft.shape[1],numsources));
-for i in range(0,numsources) :
-    score[:,:,i]=np.abs(peaka[i]*np.exp(-1j*lw0*peak_delta[i])*c0_stft-c1_stft)**2/(1+peaka[i]**2);
-
-max_score=score.max(axis=2)
-
-for i in range(0,numsources) :
-    bestind[:,:,i]=(score[:,:,i]>(np.max(score[:,:,i])*1/1000))*(score[:,:,i]==max_score)
-
-
-##Reconstitution des sources
-# Then you create a binary mask (1 for each time-frequency point belonging to my source, 0 for all other points)
-# Mask the spectrogram with the mask created in step 7.
-
-c0_stft_synth_array=np.zeros((c0_stft.shape[0],N,numsources),dtype=np.complex_)
-c1_stft_synth_array=np.zeros((c0_stft.shape[0],N,numsources),dtype=np.complex_)
-
-init=1;
-for i in range(0,numsources) :
-
-    #Séparation des sources
-    mask=bestind[:,:,i];
-
-    #Application des masques
-    #Pas bianire
-    #c0_stft_synth=((c0_stft+peaka[i]*np.exp(-1j*lw0*peak_delta[i])*c1_stft)/(1+peaka[i]**2))*mask;
-    #c1_stft_synth=((c1_stft+peaka[i]*np.exp(-1j*lw0*peak_delta[i])*c1_stft)/(1+peaka[i]**2))*mask;
-    #Binaire
-	c0_stft_synth=c0_stft*mask
-    c1_stft_synth=c1_stft*mask
-
-    #Application sur la magnitude uniquement
-    #c0_stft_synth=np.abs(c0_stft*mask)*(np.exp(1j*np.angle(c0_stft)))
-    #c1_stft_synth=np.abs(c1_stft*mask)*(np.exp(1j*np.angle(c1_stft)))
-
-    #Rajout de la omposante continue trouquée précédemment 
-    zero_pad=np.zeros([c0_stft.shape[0],1])
-    c0_stft_synth=np.column_stack((zero_pad,c0_stft_synth))
-    c1_stft_synth=np.column_stack((zero_pad,c1_stft_synth))
-
-    #Stockage
-    c0_stft_synth_array[:,:,i]=c0_stft_synth[:,:]
-    c1_stft_synth_array[:,:,i]=c1_stft_synth[:,:]
-
-#Génération des indices pour la puissance
-ind_p=np.zeros((numsources,2))
-ind_p[:,0]=np.arange(0,numsources,1)
-for i in range(0,numsources) :
-    ind_p[i,1]=np.sqrt(np.abs(np.sum(c0_stft_synth_array[:,:,i]**2)/c0_stft.shape[0]**2))
-#print(ind_p)
-
-#Tri des indices selon la puissance
-ind_p= ind_p[np.argsort(ind_p[:,1])]
-#print('--')
-#print(ind_p)
-
-#Tri du tableau de spectrogramme
-c0_stft_synth_sorted_array=c0_stft_synth_array
-c1_stft_synth_sorted_array=c0_stft_synth_array
-for i in range(0,numsources) :
-    c0_stft_synth_sorted_array[:,:,i]=c0_stft_synth_array[:,:,ind_p[i,0]]
-    c1_stft_synth_sorted_array[:,:,i]=c1_stft_synth_array[:,:,ind_p[i,0]]
+#Appelle a la fonction qui calcul DUET ou canal0 et canal1 sont les signaux temporels du signal les reste correspond aux paramètres définit ci-dessus
+c0_stft_synth_sorted_array, c1_stft_synth_sorted_array, numsources = eaa.compDuet(canal0,canal1,N,hop,p,q,maxa,maxd,abins,dbins,rejet_max_pic,rejet_max_score)
+#La fonction retourne les matrices STFT des sources séparés (1 matrice par canal).
+#La matrice est une matrice 3D ou la profondeur définit le nombre de sources tandis que la matrice 2D (lignes, colonnes) représente une STFT d'une source.
+#numsources indique le nombre de source séparé
 
 ##Ecriture
 for i in range(0,numsources) :    
