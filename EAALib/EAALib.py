@@ -175,11 +175,11 @@ def compDuet(canal0,canal1,N,hop,p,q,maxa,maxd,abins,dbins,rejet_max_pic,rejet_m
         max_ind_alpha=np.round(np.mean(r));
         max_ind_delta=np.round(np.mean(c));
         #Stockage des centres
-        peak_alpha[i,0]=maxa-(abins-(max_ind_alpha+1))*(maxa*2/abins);
-        peak_delta[i,0]=maxd-(dbins-(max_ind_delta+1))*(maxd*2/dbins);
+        peak_alpha[i,0]=maxa-(abins-(max_ind_alpha+1))*(maxa*2./abins);
+        peak_delta[i,0]=maxd-(dbins-(max_ind_delta+1))*(maxd*2./dbins);
 
     #Convertion de alpha vers a
-    peaka=(peak_alpha+np.sqrt(4+peak_alpha**2))/2;
+    peaka=(peak_alpha+np.sqrt(4+peak_alpha**2))/2.;
 
     ##Creation des masques
     # Assigne chaque frame temps-frequence (frame du spectrogramme) au pic le plus proche dans l'espace des phase/amplitude

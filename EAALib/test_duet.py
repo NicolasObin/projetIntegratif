@@ -32,10 +32,10 @@ abins=500;
 dbins=1000;
 
 #on definit un pic comme étant supérieur à 7/10 du pic max
-rejet_max_pic=7/10
+rejet_max_pic=7./10
 
 #on rejet un point de la STFT s'il ne fait pas au moins 1/100 du score max
-rejet_max_score=1/1000
+rejet_max_score=1./1000
 
 #Appelle a la fonction qui calcul DUET ou canal0 et canal1 sont les signaux temporels du signal les reste correspond aux paramètres définit ci-dessus
 c0_stft_synth_sorted_array, c1_stft_synth_sorted_array, numsources = eaa.compDuet(canal0,canal1,N,hop,p,q,maxa,maxd,abins,dbins,rejet_max_pic,rejet_max_score)
