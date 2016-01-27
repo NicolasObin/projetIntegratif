@@ -203,7 +203,6 @@ def compDuet(canal0,canal1,N,hop,p,q,maxa,maxd,abins,dbins,rejet_max_pic,rejet_m
     c0_stft_synth_array=np.zeros((c0_stft.shape[0],N,numsources),dtype=np.complex_)
     c1_stft_synth_array=np.zeros((c0_stft.shape[0],N,numsources),dtype=np.complex_)
 
-    init=1;
     for i in range(0,numsources) :
 
         #Séparation des sources
@@ -237,7 +236,7 @@ def compDuet(canal0,canal1,N,hop,p,q,maxa,maxd,abins,dbins,rejet_max_pic,rejet_m
 
     #Tri du tableau de spectrogramme
     c0_stft_synth_sorted_array=c0_stft_synth_array
-    c1_stft_synth_sorted_array=c0_stft_synth_array
+    c1_stft_synth_sorted_array=c1_stft_synth_array
     for i in range(0,numsources) :
         c0_stft_synth_sorted_array[:,:,i]=c0_stft_synth_array[:,:,ind_p[i,0]]
         c1_stft_synth_sorted_array[:,:,i]=c1_stft_synth_array[:,:,ind_p[i,0]]
