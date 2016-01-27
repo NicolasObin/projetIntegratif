@@ -50,7 +50,7 @@ def localise():
 	    flag = 0
 	    ILD = 'mean -> droite'
 
-    print ILD_max, ILD
+    print ILD
     return [flag_max, flag]
 
 

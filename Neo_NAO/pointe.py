@@ -10,7 +10,7 @@ robotIP= 'nao.local'
 PORT = 9559
 
 Audio_recording.record(robotIP)
-[maxi, mean]= loca.localise()
-X, Y, Theta = direction.moveTo(robotIP, PORT, mean)
+#[maxi, mean]= loca.localise()
+#X, Y, Theta = direction.moveTo(robotIP, PORT, mean)
 
 

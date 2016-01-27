@@ -49,7 +49,7 @@ def record(robotIP):
 	parser.add_option("-d","--duration",dest = "duration", help = "Duration of your recording")
 	parser.add_option("-o","--odir",dest = "odir", help = "Path to the output directory in your computer")
 
-	parser.set_defaults(filename = '/home/nao/recordings/audio_acquisition.wav',duration = 2)
+	parser.set_defaults(filename = '/home/nao/recordings/audio_acquisition.wav',duration = 3)
 
 	(option,args) = parser.parse_args()
 
@@ -63,7 +63,7 @@ def record(robotIP):
 	[recorder,parole] = Init(robotIP,PORT)
 	
 	# Enregistrement
-	parole.say("je t'écoute")
+	parole.say("vous pouvez parler")
 	recorder.startMicrophonesRecording(filename,"wav",48000,[1,1,1,1])
 	time.sleep(float(duration))
 	recorder.stopMicrophonesRecording()

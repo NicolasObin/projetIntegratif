@@ -45,19 +45,18 @@ def Rotation(toto, motionProxy):
         X = 0.0
         Y = 0.0
         Theta = -np.pi/2
-    print "rotate /n"
-    motionProxy.post.moveTo(X, Y, Theta)
+    #print "rotate /n"
+    #motionProxy.post.moveTo(X, Y, Theta)
     return Theta
 
 #fonction qui permet de faire marcher le robot 
 def Marcher(motionProxy):
     #marche sur 1m20
     print "marcher"
-    X = 0.2
+    X = 1.2
     Y = 0.0
     Theta = 0
-    #carto.direction(X, Y, Theta)
-    motionProxy.post.moveTo(X, Y, Theta) 
+    #motionProxy.post.moveTo(X, Y, Theta) 
     return X, Y
       
 
@@ -84,19 +83,10 @@ def paramNao(robotIP, motionProxy, postureProxy):
 
 def moveTo(robotIP, PORT, toto):
     [motionProxy, postureProxy] = Init(robotIP, PORT)
-    s = ALProxy("ALTextToSpeech", 'nao.local', 9559)
-    """
-    if toto == 1:
-        s.say ("je pense que tu es à ma gauche")
-    else:
-        s.say ("tu es à ma droite")
-    print toto
-    paramNao(robotIP, motionProxy, postureProxy)
-     """
     theta = Rotation(toto, motionProxy)
-    time.sleep(3.5)     
-   
+    time.sleep(3.5)  
     x, y = Marcher(motionProxy)
+    time.sleep(3.5)  
 
     #motionProxy.moveInit()
     return x, y, theta
