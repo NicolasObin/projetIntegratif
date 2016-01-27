@@ -155,7 +155,7 @@ def compDuet(canal0,canal1,N,hop,p,q,maxa,maxd,abins,dbins,rejet_max_pic,rejet_m
     H=histDuet(c0_stft,c1_stft,alpha,delta,lw0,p,q,maxa,maxd,abins,dbins)
 
     #Filtrage
-    filt=np.ones((4,4))*(1/16)
+    filt=np.ones((4,4))*(1./16)
     Hf=scipy.ndimage.filters.correlate(H,filt)
 
     ## Detection des sources
